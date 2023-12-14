@@ -16,6 +16,12 @@ class Database:
             result = self.cursor.execute("SELECT * FROM `users` WHERE `user_id` = ?", (user_id,)).fetchall()
             return bool(len(result))
         
+
+    def user_age(self, user_id):
+        with self.connection:
+            result = self.cursor.execute("SELECT age FROM `users` WHERE `user_id` = ?", (user_id,)).fetchall()
+            return bool(len(result))
+        
     def set_nickname(self, user_id, nickname):
         with self.connection:
             return self.cursor.execute("UPDATE `users` SET `nickname` = ? WHERE `user_id` = ?", (nickname, user_id,))
@@ -39,10 +45,24 @@ class Database:
 
     def get_user_info(self, user_id):
         with self.connection:
-            result =  self.cursor.execute("SELECT `nickname`, `age` FROM `users` WHERE `user_id` = ?", (user_id,)).fetchall()
-            for row in result:
-                info = str(row[0])
-            return info
+            result = self.cursor.execute("SELECT `nickname`, `age` FROM `users` WHERE `user_id` = ?", (user_id,)).fetchone()
+            if result:
+                nickname, age = result  # Разделение результата запроса на nickname и age
+                return f"Никнейм: {nickname} \nВозраст: {age}"
+            else:
+                return "Информация о пользователе не найдена"
+        
+
+    def delete_user(self, user_id):
+        try:
+            with self.connection:
+                self.cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+                self.connection.commit()
+                print(f"Пользователь с ID {user_id} удален")
+                return True
+        except sqlite3.Error as error:
+            print(error)
+            return False
 # try:
 #     # connection to exist database
 #     connection = psycopg2.connect(
