@@ -94,15 +94,37 @@ async def process_age(message: types.Message):
             await message.answer('Пожалуйста, введите ваш возраст цифрами.')
         else:
             if handler.set_age(message.from_user.id, message.text):
-                handler.set_signup(message.from_user.id, "done")
-                await message.answer('Ваш возраст сохранен успешно')
-                await message.answer('Регистрация прошла успешно', reply_markup=nav.mainmenu)
+                handler.set_signup(message.from_user.id, "setgender")
+                await ask_gender(message)
             else:
                 await message.answer('Ошибка при сохранении возраста. Попробуйте еще раз.')
     else:
+        await process_gender(message)
+
+
+async def ask_gender(message: types.Message):
+    await message.answer('Выберите пол: ', reply_markup=nav.genderMenu)
+
+
+@dp.message_handler()
+async def process_gender(message: types.Message):
+    if handler.get_signup(message.from_user.id) == 'setgender':
+        user_id = message.from_user.id
+        if not handler.user_exist(user_id):
+            await message.answer('Пожалуйста, начните с команды /start.')
+            return
+        else:
+            if message.text.lower() not in ['male', 'female'] and message.text not in ['Male 🚹', 'Female 🚺']:
+                await message.answer('Пожалуйста, укажите ваш пол как "male" или "female" или выберите внизу с помошью кнопок 👇🏻!.')
+                return
+            
+            if handler.set_gender(user_id, message.text):
+                handler.set_signup(user_id, "done")
+                await message.answer('Регистрация прошла успешно ! ❤', reply_markup=nav.mainmenu)
+            else:
+                await message.answer('Ошибка при сохранении пола. Попробуйте еще раз.')
+    else:
         await message.answer('Что?')
-
-
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)

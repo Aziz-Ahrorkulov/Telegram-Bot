@@ -42,13 +42,35 @@ class Database:
     def set_signup(self, user_id, signup):
         with self.connection:
             return self.cursor.execute("UPDATE `users` SET `signup` = ? WHERE `user_id` = ?", (signup, user_id,))
+        
+    def set_gender(self, user_id, gender):
+        with self.connection:
+            try:
+                self.cursor.execute("UPDATE users SET gender = ? WHERE user_id = ?", (gender, user_id))
+                return True
+            except sqlite3.Error as e:
+                print(f"Error setting gender: {e}")
+                return False
 
+    def get_gender(self, user_id):
+        with self.connection:
+            try:
+                self.cursor.execute("SELECT gender FROM users WHERE user_id = ?", (user_id,))
+                result = self.cursor.fetchone()
+                if result:
+                    return result[0]
+                else:
+                    return None
+            except sqlite3.Error as e:
+                print(f"Error getting gender: {e}")
+                return None
+            
     def get_user_info(self, user_id):
         with self.connection:
-            result = self.cursor.execute("SELECT `nickname`, `age` FROM `users` WHERE `user_id` = ?", (user_id,)).fetchone()
+            result = self.cursor.execute("SELECT `nickname`, `age`, gender FROM `users` WHERE `user_id` = ?", (user_id,)).fetchone()
             if result:
-                nickname, age = result  # Разделение результата запроса на nickname и age
-                return f"Никнейм: {nickname} \nВозраст: {age}"
+                nickname, age, gender = result  # Разделение результата запроса на nickname и age
+                return f"Никнейм: {nickname} \nВозраст: {age} \nПол: {gender}"
             else:
                 return "Информация о пользователе не найдена"
         
