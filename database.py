@@ -15,7 +15,22 @@ class Database:
         with self.connection:
             result = self.cursor.execute("SELECT * FROM `users` WHERE `user_id` = ?", (user_id,)).fetchall()
             return bool(len(result))
+    
+    def get_last_nickname(self, user_id):
+        self.cursor.execute("SELECT nickname FROM users WHERE user_id=?", (user_id,))
+        result = self.cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            return None
         
+    def get_last_age(self, user_id):
+        self.cursor.execute("SELECT age FROM users WHERE user_id=?", (user_id,))
+        result = self.cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            return None
 
     def user_age(self, user_id):
         with self.connection:
